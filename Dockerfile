@@ -9,6 +9,13 @@ RUN echo 'LANG="en_US.UTF-8"' > /etc/default/locale
 # It should be the same key as https://www.postgresql.org/media/keys/ACCC4CF8.asc
 RUN apt-key adv --keyserver keyserver.ubuntu.com --recv-keys B97B0AFCAA1A47F044F244A07FCC7D46ACCC4CF8
 
+
+# Ubuntu CN mirror
+# 2 reasons to set the mirror after apt-get update:
+#  1) Docker Hub takes more than 15 minutes to fetch the packages list since the mirror server is in China
+#  2) apt repository format is subject to race conditions when a mirror is updated (http://askubuntu.com/a/160179)
+RUN sed -i 's/archive\.ubuntu\.com/mirrors.ustc.edu.cn/g' /etc/apt/sources.list
+
 # Add PostgreSQL's repository. It contains the most recent stable release
 #     of PostgreSQL, ``9.4``.
 # install dependencies as distrib packages when system bindings are required
@@ -38,6 +45,8 @@ RUN echo "deb http://apt.postgresql.org/pub/repos/apt/ trusty-pgdg main" > /etc/
     libldap2-dev \
     libsasl2-dev \
     libssl-dev \
+    # CN fonts
+    ttf-wqy-zenhei \
     # Librairies required for LESS
     node-less \
     nodejs \
@@ -46,6 +55,11 @@ RUN echo "deb http://apt.postgresql.org/pub/repos/apt/ trusty-pgdg main" > /etc/
     libjpeg8-dev \
     # Git is required to clone Odoo OCB project
     git
+    
+# pip CN mirror
+RUN mkdir -p ~/pip && \
+  echo "[global]" > ~/pip/pip.conf && \
+  echo "index-url = https://pypi.mirrors.ustc.edu.cn/simple" >> ~/pip/pip.conf
 
 # Install Odoo python dependencies
 ADD sources/pip-req.txt /opt/sources/pip-req.txt
@@ -60,8 +74,11 @@ RUN easy_install -UZ py3o.template
 
 # install wkhtmltopdf based on QT5
 # Warning: do not use latest version (0.12.2.1) because it causes the footer issue (see https://github.com/odoo/odoo/issues/4806)
-ADD http://download.gna.org/wkhtmltopdf/0.12/0.12.1/wkhtmltox-0.12.1_linux-trusty-amd64.deb /opt/sources/wkhtmltox.deb
+ADD /sources/wkhtmltox.deb /opt/sources/wkhtmltox.deb
 RUN dpkg -i /opt/sources/wkhtmltox.deb
+
+# Google links CN mirror
+RUN sed -i "s/fonts\.googleapis\.com/fonts.lug.ustc.edu.cn/g" `grep 'fonts\.googleapis\.com' -rl /opt/odoo/sources/odoo/addons`
 
 # create the odoo user
 RUN adduser --home=/opt/odoo --disabled-password --gecos "" --shell=/bin/bash odoo
