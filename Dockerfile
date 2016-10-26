@@ -77,9 +77,6 @@ RUN easy_install -UZ py3o.template
 ADD /sources/wkhtmltox.deb /opt/sources/wkhtmltox.deb
 RUN dpkg -i /opt/sources/wkhtmltox.deb
 
-# Google links CN mirror
-RUN sed -i "s/fonts\.googleapis\.com/fonts.lug.ustc.edu.cn/g" `grep 'fonts\.googleapis\.com' -rl /opt/odoo/sources/odoo/addons`
-
 # create the odoo user
 RUN adduser --home=/opt/odoo --disabled-password --gecos "" --shell=/bin/bash odoo
 
@@ -89,6 +86,14 @@ USER odoo
 
 RUN /bin/bash -c "mkdir -p /opt/odoo/{bin,etc,sources/odoo,additional_addons,data}"
 RUN /bin/bash -c "mkdir -p /opt/odoo/var/{run,log,egg-cache}"
+
+# Add Odoo OCB sources and remove .git folder in order to reduce image size
+WORKDIR /opt/odoo/sources
+RUN git clone https://github.com/OCA/OCB.git -b 10.0 --depth=1 odoo && \
+  rm -rf odoo/.git
+  
+# Google links CN mirror
+RUN sed -i "s/fonts\.googleapis\.com/fonts.lug.ustc.edu.cn/g" `grep 'fonts\.googleapis\.com' -rl /opt/odoo/sources/odoo/addons`
 
 # Execution environment
 USER 0
