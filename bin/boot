@@ -36,6 +36,10 @@ function start {
         sudo -i -u odoo sed -i "s/_DB_USER_/$DB_USER/g" /opt/odoo/etc/odoo.conf
     fi
 
+    if [ "$DB_HOST" ]; then
+        sudo -i -u odoo sed -i "s/_DB_HOST_/$DB_HOST/g" /opt/odoo/etc/odoo.conf
+    fi
+
     if [ "$DB_PASSWORD" ]; then
         sudo -i -u odoo sed -i "s/_DB_PASSWORD_/$DB_PASSWORD/g" /opt/odoo/etc/odoo.conf
     fi
