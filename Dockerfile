@@ -10,7 +10,7 @@ RUN echo 'LANG="en_US.UTF-8"' > /etc/default/locale
 RUN apt-key adv --keyserver keyserver.ubuntu.com --recv-keys B97B0AFCAA1A47F044F244A07FCC7D46ACCC4CF8
 
 # Add PostgreSQL's repository. It contains the most recent stable release
-#     of PostgreSQL, ``9.4``.
+#     of PostgreSQL, ``9.5``.
 # install dependencies as distrib packages when system bindings are required
 # some of them extend the basic odoo requirements for a better "apps" compatibility
 # most dependencies are distributed as wheel packages at the next step
@@ -19,7 +19,7 @@ RUN echo "deb http://apt.postgresql.org/pub/repos/apt/ trusty-pgdg main" > /etc/
   apt-get -yq install \
     adduser \
     ghostscript \
-    postgresql-client-9.4 \
+    postgresql-client-9.5 \
     python \
     python-pip \
     python-imaging \
@@ -78,11 +78,18 @@ WORKDIR /opt/odoo/sources
 RUN git clone https://github.com/OCA/OCB.git -b 9.0 odoo && \
   rm -rf odoo/.git
 
+ADD sources/odoo.conf /opt/odoo/etc/odoo.conf
+ADD auto_addons /opt/odoo/auto_addons
+
+RUN git config --global user.email "contact@elico-corp.com"
+RUN git config --global user.name "Elico Corp Odoo Docker"
+
 # Execution environment
 USER 0
-ADD sources/odoo.conf /opt/sources/odoo.conf
+ADD scripts /mnt/scripts
+RUN mkdir /mnt/ssh
 WORKDIR /app
-VOLUME ["/opt/odoo/var", "/opt/odoo/etc", "/opt/odoo/additional_addons", "/opt/odoo/data"]
+VOLUME ["/opt/odoo/var", "/opt/odoo/etc", "/opt/odoo/additional_addons", "/opt/odoo/data", "/mnt/scripts", "/mnt/ssh"]
 # Set the default entrypoint (non overridable) to run when starting the container
 ENTRYPOINT ["/app/bin/boot"]
 CMD ["help"]
