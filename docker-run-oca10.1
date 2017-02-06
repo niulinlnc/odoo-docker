@@ -1,0 +1,12 @@
+docker run -d \
+      -e VIRTUAL_HOST=www.ongood.cn,ongood.cn,odoo10.ongood.cn \
+      -e VIRTUAL_PORT=8069 \
+      -e ADMIN_PASSWORD=xxxxx \
+      -e DB_HOST=172.31.26.235 \
+      -e DB_USER=odoo \
+      -e DB_FILTER=.* \
+      -e ADDONS_REPO=https://git.oschina.net/ongood/odoo-base.git \
+      --name odoo10 \
+       ongood/odoo-china:10.0 \
+      start
+
