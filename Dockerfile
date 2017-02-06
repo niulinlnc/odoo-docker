@@ -1,6 +1,6 @@
 
 FROM elicocorp/odoo-china:10.0
-MAINTAINER OnGood <contact@ongood.cn>
+MAINTAINER Elico Corp <contact@elico-corp.com>
 
 # FIX odoo.conf
 
